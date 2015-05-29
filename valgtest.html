@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test dig selv - hvem er du mest enig med? - Folketingsvalg 2015</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="jquery.mobile.custom.theme.min.css" />
+  <link rel="stylesheet" href="jquery.mobile.custom.structure.min.css" />
+
+  <script src="jquery-1.11.1.min.js"></script>
+  <script src="jquery.mobile-1.4.5.min.js"></script>
+
+<style>
+.slideContainer { border:0px solid black;float:left;padding-right:20px;margin-top:10px; }
+body { font-family:Arial;margin:0px;padding:0px;background-color:#fff; }
+.qabox { border:2px solid #ffffff;background-color:#fff;margin:0px;padding:10px;clear:both;margin-bottom:10px; }
+
+.qabox:nth-child(odd) { background-color:#fafafa; }
+.qabox:hover {border:2px solid #aaaaaa; }
+
+.qbox { border:0px solid red;margin:0px;padding:0px;float:left; }
+
+.markL { float:left;text-align:left;padding:0px;margin;0px;font-size:10px;margin-left:60px; }
+.markC { float:center;text-align:center;padding:0px;margin;0px;font-size:10px; }
+.markR {
+  float:right;text-align:right;padding:0px;margin;0px;font-size:10px;margin-right:20px; }
+h1 { font-size:22px; }
+h2 { font-size:18px;font-weight:normal; }
+#content { position:absolute;z-index:1; }
+.ui-page-theme-a, .ui-page-theme-a .ui-panel-wrapper { background-color:#fff; }
+#result { width:100%;background-color:#ffffff;position:relative;z-index:9;margin:0px;padding:0px;display:none;border:0px solid green; }
+#resultframe { border:0px solid red;text-align:center;padding-top:5px;width:80%;margin: 0 auto; }
+#resultc { border:0px solid red; }
+
+.party { float:left;width:12.4%;text-align:center;border:0px solid green;font-size:11px; }
+.party img { width:30px;margin-top:20px; }
+.bg { background-coor:#44aa44;width:33%;border:0px solid blue;padding:0px;margin-left:33%; }
+.bg:hover { background-color:#55bb55; }
+
+.reverseChart {
+  width:100%;background-color:#ffffff;margin:0px;border-bottom:0px solid #44aa44;padding:0px; }
+
+.pcttal {
+  width:100%;background-color:#fff;margin:0px;border-bottom:0px solid #44aa44;padding:0px;height:20px; }
+
+#p0 .bg { background-color:#ee6666; }
+#p1 .bg { background-color:#33bb33; }
+#p2 .bg { background-color:#cc0000; }
+#p3 .bg { background-color:#663366; }
+#p4 .bg { background-color:#117711; }
+#p5 .bg { background-color:#333399; }
+#p6 .bg { background-color:#ee9933; }
+#p7 .bg { background-color:#444444; }
+
+ .ui-page-theme-a a { color:#000;font-weight:normal; }
+ .ui-page-theme-a a:visited { color:#000;font-weight:normal; }
+
+</style>
+</head>
+<body>
+
+<script>
+var pinfo = Array (
+  Array("Ø","Enhedslisten","6.gif"),
+Array("F","SF","3.gif"),
+Array("A","Socialdemokraterne","1.gif"),
+                    Array("B","De Radikale","4.gif"),
+                  Array("K","De Konservative","7.gif"),
+                  Array("V","Venstre","5.gif"),
+                  Array("I","Liberal Alliance","14.gif"),
+                  Array("O","Dansk Folkeparti","2.gif")
+//                  Array("K","Kristendemokraterne","12.gif")
+                   );
+
+var qweights = Array (
+                       //  Ø  F  A  B  C  V  I  O
+                    Array( 1, 1, 1, 1,-1,-1,-1,-1),   //q1
+  //1 S+RV+SF+EL
+                    Array( 1, 1, 1, 1, 1,-1,-1,-1),   //q2
+  //2 S+RV+SF+EL+KF
+                    Array( 1, 1, 1, 1,-1,-1, 1,-1),   //q3
+  //3 S+SF+RV+EL+LA
+                    Array( 1, 1, 1, 1, 1, 0,-1, 1),   //q4
+  //4 S+DF+SF+RV+EL+KF
+                    Array( 1, 1, 1, 1,-1,-1, 1,-1),   //q6
+  //6 S+SF+RV+EL+LA
+                    Array( -1,-1,-1,-1,-1,-1, 0, 1),   //q7
+  //7 S+SF+RV+V+EL+KF
+                    Array( 1, 1, 1, 1, 1, 1, 1,-1),   //q8
+  //8 alle undtagen DF
+                    //    EL SF  S RV KF  V LA DF
+                    Array( 1, 1, 1, 1,-1, 1, 1,-1),   //q9
+  //9 S+SF+RV+V+EL+LA
+                    Array(-1, 1, 1, 1, 1, 1,-1,-1),   //q10
+  //10  S+SF+RV+V+KF
+  //11  S+SF+RV+V+KF+LA
+                    Array( 1,-1,-1,-1,-1,-1,-1, 1),   //q11
+  //12  V, DF, KF, RV, LA
+                    Array(-1,-1,-1, 1, 1, 1, 1, 1),   //q12
+  //13  V+KF+DF+LA
+                    Array(-1,-1,-1,-1, 1, 1, 1, 1),   //q13
+  //14  V, S, DF, SF, KF
+                    Array(-1, 1, 1,-1, 1, 1,-1, 1),   //q14
+  //15  V, S, DF, SF, KF
+                    Array( 0,-1,-1, 1,-1, 1,-1, 1),   //q15
+  //16  V, S, DF, KF, LA
+                    Array(-1,-1, 1,-1, 1, 1, 1, 1),   //q16
+  //17  DF mod resten
+                    Array(-1,-1,-1,-1,-1,-1,-1, 1),   //q17
+  //18  V, DF, KF, RV, NY
+                    Array(-1,-1,-1, 1, 1, 1, 1, 1)   //q18
+);
+
+  var qs = qweights.length; //10 spørgsmål
+
+function resize() { //make responsive
+  var height = $(window).height()-50;
+  var width = $(document).width();
+
+  var bgheight;
+  if (width > height+50)
+    bgheight = height/2.2;
+  else
+    bgheight = height/3;
+
+  bgheight = Math.min(350,bgheight);
+    $(".bg").height(bgheight);
+
+  $("#result").height(height+250);
+
+
+  $(".qabox").width(width);
+
+  if (width < 500)
+  {
+    $(".qbox").width(width-12);
+    $(".sliderx").width(width-25);
+    $(".markC").hide();
+  }
+  else
+  {
+    $(".qbox").width(width-12);
+    $(".sliderx").width(width-25);
+    $(".markC").show();
+  }
+
+
+    $( ".slider" ).slider({
+      value:50,
+      min: 0,
+      max: 100,
+      step: 10,
+      animate: "slow",
+      slide: function( event, ui ) {
+        $( "#amount" ).val( "$" + ui.value );
+      }
+    });
+}
+
+function rate() {
+  $("#result").show();
+  $("#content").hide();
+
+  //beregn enighed for hvert parti
+  var rating = Array(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  var pct = Array(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  for (var q =0; q < qs; q++)
+  {
+    var qval = $("#q"+q).val();
+
+    if (qval != 990)
+    {
+      for (var p =0; p < pinfo.length; p++)
+      {
+        rating[p] += -Math.abs( qweights[q][p] * 50 - qval );
+        pct[p] += Math.abs( qweights[q][p] * 50 - qval );
+      }
+    }
+  }
+
+  //skaler resultater 0-1
+  var maxRating = -999999;
+  var minRating = 9999999;
+  var res = Array();
+  var res2;
+  for (var p =0; p < pinfo.length; p++)
+  {
+    if (rating[p] > maxRating)
+    {
+      maxRating = rating[p];
+      res = Array(pinfo[p][1]);
+      res2 = pinfo[p][3];
+    }
+    else if (rating[p] == maxRating)
+    {
+      res.push(pinfo[p][1]);
+      res2='';
+    }
+
+    if (rating[p] < minRating)
+      minRating = rating[p];
+  }
+
+  var ratingSkaleret = Array();
+  for (var p =0; p < pinfo.length; p++)
+  {
+     ratingSkaleret[p] = (rating[p] - minRating) / (maxRating - minRating);
+  }
+
+  //sæt søjlehøjde
+  var maxH = $("#p0 .bg").height()-50; //max højde af søjler
+  for (var p =0; p < pinfo.length; p++)
+  {
+    $("#p"+p+" .reverseChart").height(maxH - ratingSkaleret[p] * maxH);
+    $("#p"+p).prop("title",100-Math.round(pct[p]/17 * 100)/100 + " % enig"); //beregn en form for enighedsgrad
+    $("#p"+p+" .pcttal").html("<nobr>" + Math.round(100 - pct[p]/17) + " %</nobr>"); //beregn en form for enighedsgrad
+
+  }
+
+  if (res.length == pinfo.length)
+    resout = "Dine holdninger afslører ingen politiske præferencer";
+  else if (res.length > 1)
+  {
+    for (var i =0; i < res.length; i++)
+      if (i==0)
+        resout = "Du er mest enig med "+res[i];
+      else if (i < res.length-1)
+        resout += ", " +res[i];
+      else
+        resout += " og " +res[i];
+  }
+  else
+   resout = "Du er mest enig med "+res[0];
+  $("#res").html(resout);
+  parent.totop(); //hop op
+}
+
+
+$(function() {
+  resize();
+  $(window).resize(function() { resize() });
+});
+</script>
+
+
+<div id="content">
+  <form>
+
+<!--
+    <center><h1>Test dig selv - hvem er du mest enig med?</h1>
+      <div style="width:85%;text-align:left;"><h2>Angiv din holdning til 17 politiske udsagn som har været sendt til afstemning blandt folketingets partier og find dit politiske
+        ståsted. God fornøjelse.</h2> </div>
+    </center>
+-->
+<div id=qs></div>
+  <div class="qabox" id=q0box>
+    <div class="qbox">
+Personer, der kommer ind i kontanthjælpssystemet, skal ikke begynde
+    på en nedsat ydelse som den såkaldte starthjælp.
+    </div>
+    <div style="clear:both;"></div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q0" min="-50" max="50" step=10 value="0" class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+
+<div class="qabox" id=q1box>
+  <div class="qbox">
+Danmarks udledning af drivhusgasser skal i 2020 reduceres med 40 procent i forhold til niveauet i 1990.
+  </div>
+  <div class="slideContainer">
+    <div class="markL">Uenig</div>
+    <div class="markR">Enig</div>
+    <div class="markC">Hverken eller</div>
+    <div class="sliderx">
+      <input type="range" name="slider-1" id="q1" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+    </div>
+  </div>
+  <div style="clear:both;"></div>
+</div>
+
+<div class="qabox" id=q2box>
+<div class="qbox">
+Den kriminelle lavalder skal være 15, ikke 14 år.
+ </div>
+ <div class="slideContainer">
+   <div class="markL">Uenig</div>
+   <div class="markR">Enig</div>
+   <div class="markC">Hverken eller</div>
+    <div class="sliderx">
+      <input type="range" name="slider-2" id="q2" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+    </div>
+ </div>
+ <div style="clear:both;"></div>
+</div>
+
+
+<div class="qabox" id=q3box>
+<div class="qbox">
+Indsatsen mod brugen af skattely skal styrkes.
+ </div>
+ <div class="slideContainer">
+   <div class="markL">Uenig</div>
+   <div class="markR">Enig</div>
+   <div class="markC">Hverken eller</div>
+    <div class="sliderx">
+      <input type="range" name="slider-3" id="q3" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+    </div>
+ </div>
+ <div style="clear:both;"></div>
+</div>
+
+<div class="qabox" id=q4box>
+<div class="qbox">
+Asylansøgere skal have lov at bo og arbejde uden for asylcentrene, mens de venter på afgørelse i deres sag.
+ </div>
+ <div class="slideContainer">
+   <div class="markL">Uenig</div>
+   <div class="markR">Enig</div>
+   <div class="markC">Hverken eller</div>
+    <div class="sliderx">
+      <input type="range" name="slider-4" id="q4" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+    </div>
+ </div>
+ <div style="clear:both;"></div>
+</div>
+
+<div class="qabox" id=q5box>
+<div class="qbox">
+Grimhøjmoskeen i Aarhus skal forbydes, fordi den radikaliserer unge.
+ </div>
+ <div class="slideContainer">
+   <div class="markL">Uenig</div>
+   <div class="markR">Enig</div>
+   <div class="markC">Hverken eller</div>
+    <div class="sliderx">
+      <input type="range" name="slider-1" id="q5" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+    </div>
+ </div>
+ <div style="clear:both;"></div>
+</div>
+
+<div class="qabox" id=q6box>
+<div class="qbox">
+Samfundstjeneste skal i højere grad bruges over for dømte kriminelle som alternativ til fængsel.
+ </div>
+ <div class="slideContainer">
+   <div class="markL">Uenig</div>
+   <div class="markR">Enig</div>
+   <div class="markC">Hverken eller</div>
+    <div class="sliderx">
+      <input type="range" name="slider-1" id="q6" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+    </div>
+ </div>
+ <div style="clear:both;"></div>
+</div>
+
+  <div class="qabox" id=q7box>
+    <div class="qbox">
+Personer af samme køn skal have mulighed for at indgå ægteskab ved en kirkelig handling.
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q7" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+  <div class="qabox" id=q8box>
+    <div class="qbox">
+Journalister og andre borgere skal ikke have ret til aktindsigt i
+    dokumenter, der er indgået i betjeningen af en minister
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q8" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+  <div class="qabox" id=q9box>
+    <div class="qbox">
+Hvis DONG har brug for en kapitaltilførsel, skal staten træde til med pengene i stedet for at sælge til private investorer.
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q9" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+  <div class="qabox" id=q10box>
+    <div class="qbox">
+Dagpengeperioden i Danmark bør være to år i stedet for fire år.
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q10" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+  <div class="qabox" id=q11box>
+    <div class="qbox">
+Staten skal fremme det frie sygehusvalg mellem private og offentlige sygehuse.
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q11" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+  <div class="qabox" id=q12box>
+    <div class="qbox">
+Danmark skal have et nationalt testcenter for vindindustrien, hvor
+    der kan afprøves prototyper af meget store vindmøller.
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q12" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+  <div class="qabox" id=q13box>
+    <div class="qbox">
+Multimedieskatten bør afskaffes, fordi den har en skadelig virkning på udbredelsen af it-teknologier.
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q13" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+  <div class="qabox" id=q14box>
+    <div class="qbox">
+Folkeskolens elever skal kunne sendes til specialundervisning uden, at der skal foretages en forudgående pædagogisk-psykologisk vurdering
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q14" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+  <div class="qabox" id=q15box>
+    <div class="qbox">
+For at modgå den tiltagende brug af engelsk på danske universiteter skal det fremgå ved lov, at universiteterne i alle fag har pligt til at bidrage til udviklingen af det danske sprog.
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q15" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+  <div class="qabox" id=q16box>
+    <div class="qbox">
+ 64-årige skal have en særlig skatterabat, så de bliver længere
+    på arbejdsmarkedet.
+    </div>
+    <div class="slideContainer">
+      <div class="markL">Uenig</div>
+      <div class="markR">Enig</div>
+      <div class="markC">Hverken eller</div>
+      <div class="sliderx">
+         <input type="range" name="slider-1" id="q16" min="-50" max="50" value="0" step=10 class="ui-hidden-accessible">
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+
+  <center>
+    <input type=button onclick="rate()" value="Test dine holdninger" data-role="none">
+  </center>
+
+    <div style="clear:both;height:25px;">&nbsp;</div>
+  </form>
+</div>
+
+
+
+<div id=result>
+  <div id=resultframe>
+    <center>
+    <h1><span id='res'>?</span></h1>
+      <div style="width:100%;text-align:left;border:0px solid red;"><h2 id=res2> </h2></div>
+    </center>
+    <div id=resultc>
+
+      <div id=p0 class=party>
+        <div class=bg>
+          <div class=reverseChart></div>
+          <div class=pcttal></div>
+        </div>
+        <img src="6.gif" alt="Enhedslisten" title="Enhedslisten">
+      </div>
+
+<div id=p1 class=party>
+  <div class=bg>
+    <div class=reverseChart></div>
+          <div class=pcttal></div>
+  </div>
+ <img src="3.gif" alt="SF" title="SF">
+</div>
+
+<div id=p2 class=party>
+  <div class=bg>
+    <div class=reverseChart></div>
+          <div class=pcttal></div>
+  </div>
+ <img src="1.gif" alt="Socialdemokraterne" title="Socialdemokraterne">
+</div>
+
+<div id=p3 class=party>
+  <div class=bg>
+    <div class=reverseChart></div>
+          <div class=pcttal></div>
+  </div>
+ <img src="4.gif" alt="Radikale" title="Radikale">
+</div>
+
+<div id=p4 class=party>
+  <div class=bg>
+    <div class=reverseChart></div>
+          <div class=pcttal></div>
+  </div>
+ <img src="7.gif" alt="Konservative" title="Konservative">
+</div>
+
+<div id=p5 class=party>
+  <div class=bg>
+    <div class=reverseChart></div>
+          <div class=pcttal></div>
+  </div>
+ <img src="5.gif" alt="Venstre" title="Venstre">
+</div>
+
+<div id=p6 class=party>
+  <div class=bg>
+    <div class=reverseChart></div>
+          <div class=pcttal></div>
+  </div>
+ <img src="la.jpg" alt="Liberal Alliance" title="Liberal Alliance">
+</div>
+
+      <div id=p7 class=party>
+        <div class=bg>
+          <div class=reverseChart></div>
+          <div class=pcttal></div>
+        </div>
+        <img src="2.gif" alt="Dansk Folkeparti" title="Dansk Folkeparti">
+      </div>
+
+    <div style="clear:both;height:5px;">&nbsp;</div>
+    </div>
+
+    <div style="clear:both;margin:5px;">&nbsp;</div>
+    <input type=button onclick='$("#result").hide();$("#content").show();' value="Prøv igen" data-role="none">
+
+
+    <div style="clear:both;margin-top:30px;font-size:11px;text-align:left;">
+<div style="float:left;width:30px;">
+      <a href="http://dk.okfn.org" target="_top"><img src="http://www.opennordics.org/wp-content/uploads/2015/02/Open-Knowledge-Denmark-Logo-300x300.jpeg" style="float:left;width:30px;margin-right:10px;border:0px;"></a>
+    </div>
+      Testen er udviklet af <a href="http://dk.okfn.org/">Open Knowledge Danmark</a>. Koden er frigivet som open source og kan findes på <a href="https://github.com/ok-dk">Github</a>. Dine valg registreres ikke og bliver dermed heller ikke anvendt andre sammenhænge.
+Søjlerne er skaleret med henblik på at vise forskellene mellem graden af enighed og er ikke indekseret til at starte i nul.
+To søjler med samme procenttal kan have forskellig højde pga afrunding.
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
